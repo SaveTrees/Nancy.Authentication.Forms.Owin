@@ -30,15 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Nancy">
-      <HintPath>..\packages\Nancy.0.20.0\lib\net40\Nancy.dll</HintPath>
-    </Reference>
-    <Reference Include="Nancy.Authentication.Forms">
-      <HintPath>..\packages\Nancy.Authentication.Forms.0.20.0\lib\net40\Nancy.Authentication.Forms.dll</HintPath>
-    </Reference>
-    <Reference Include="Nancy.Owin">
-      <HintPath>..\packages\Nancy.Owin.0.20.0\lib\net40\Nancy.Owin.dll</HintPath>
-    </Reference>
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
@@ -48,12 +39,22 @@
   <ItemGroup>
     <Compile Include="IClaimsPrincipalLookup.cs" />
     <Compile Include="AppBuilderExtensions.cs" />
-    <Compile Include="NancyFormsAuthMiddleware.cs" />
+    <Compile Include="NancyFormsAuthenticationMiddleware.cs" />
     <Compile Include="NancyContextExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Nancy\src\Nancy.Authentication.Forms\Nancy.Authentication.Forms.csproj">
+      <Project>{e8b18958-7c8a-4fba-af00-3041c34a20ce}</Project>
+      <Name>Nancy.Authentication.Forms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Nancy\src\Nancy\Nancy.csproj">
+      <Project>{34576216-0dca-4b0f-a0dc-9075e75a676f}</Project>
+      <Name>Nancy</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
