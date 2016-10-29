@@ -34,51 +34,36 @@
         /// <returns>The next invokable in the chain.</returns>
         public async Task Invoke(IDictionary<string, object> environment)
         {
-            var requestHeaders = (IDictionary<string, string[]>)environment["owin.RequestHeaders"];
-            if (!requestHeaders.ContainsKey(CookieHeaderName))
+            ClaimsPrincipal claimsPrincipal = null;
+            var requestHeaders = (IDictionary<string, string[]>) environment["owin.RequestHeaders"];
+            if (requestHeaders.ContainsKey(CookieHeaderName))
             {
-                if (_next != null)
+                var authCookie = GetFormsAuthenticationCookies(requestHeaders[CookieHeaderName]).SingleOrDefault();
+                if (authCookie != null)
                 {
-                    await _next.Invoke(environment);
+                    var user = FormsAuthentication.DecryptAndValidateAuthenticationCookie(authCookie.Value, _formsAuthenticationConfiguration);
+
+                    Guid userMapperId;
+                    if (Guid.TryParse(user, out userMapperId))
+                    {
+                        // The claimPrinciple is for the Anonymous user, if the user doesn't exist.
+                        await _claimsPrincipalLookup.UserExists(userMapperId, out claimsPrincipal);
+                    }
                 }
-                return;
             }
 
-            var authCookie = GetFormsAuthenticationCookies(requestHeaders[CookieHeaderName]).SingleOrDefault();
-            if (authCookie == null)
+            if (claimsPrincipal == null)
             {
-                if (_next != null)
-                {
-                    await _next.Invoke(environment);
-                }
-                return;
+                claimsPrincipal = _claimsPrincipalLookup.GetAnonymousUserClaimsPrincipal();
             }
 
-            var user = FormsAuthentication.DecryptAndValidateAuthenticationCookie(authCookie.Value, _formsAuthenticationConfiguration);
-
-            Guid userMapperId;
-            if (Guid.TryParse(user, out userMapperId))
+            if (environment.ContainsKey(ServerUser))
             {
-                ClaimsPrincipal claimsPrincipal;
-                //var claimsPrincipal = await _claimsPrincipalLookup.GetClaimsPrincial(userId);
-                if (await _claimsPrincipalLookup.UserExists(userMapperId, out claimsPrincipal))
-                {
-                    if (environment.ContainsKey(ServerUser))
-                    {
-                        environment[ServerUser] = claimsPrincipal;
-                    }
-                    else
-                    {
-                        environment.Add(ServerUser, claimsPrincipal);
-                    }
-                }
-                else
-                {
-                    if (environment.ContainsKey(ServerUser))
-                    {
-                        environment.Remove(ServerUser);
-                    }
-                }
+                environment[ServerUser] = claimsPrincipal;
+            }
+            else
+            {
+                environment.Add(ServerUser, claimsPrincipal);
             }
 
             if (_next != null)

@@ -16,5 +16,10 @@
         /// <param name="claimsPrincipal">The claims principle for the user, if found.</param>
         /// <returns><c>True</c> if a user can be found with the <paramref name="userMapperId"/>, <c>false</c> otherwise.</returns>
         Task<bool> UserExists(Guid userMapperId, out ClaimsPrincipal claimsPrincipal);
+
+        /// <summary>
+        ///
+        /// </summary>
+        ClaimsPrincipal GetAnonymousUserClaimsPrincipal();
     }
 }
